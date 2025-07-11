@@ -1,0 +1,81 @@
+<html>
+{% block content %}
+<h1 class="mx-auto">Maze Runner!</h1>
+<div>
+    <form onsubmit="submitCode(event)">
+        <h2>Your code:</h2>
+        <textarea id="code" rows="30" cols="70">
+import random
+
+return random.choice([0,2]);
+    </textarea>
+        <button>Send!</button>
+    </form>
+</div>
+<div>
+    <h2>Last run:</h2>
+    <canvas id="canvas" width="500" height="500" style="border:1px solid #000000;"></canvas>
+</div>
+{% endblock %}
+<script>
+    maze = null;
+    moves = null;
+    posx = null;
+    posy = null;
+    step = null;
+    function submitCode(event) {
+        event.preventDefault()
+        let data = {code: event.target.elements.code.value};
+        fetch("/submit", {
+          method: "POST",
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(data)
+        })
+        .then((response) => response.json())
+        .then(json => {
+          console.log("Request complete! response:", json);
+          init(json);
+        });
+    }
+    function init(json){
+        maze = json.maze;
+        moves = json.moves;
+        posx = json.pos_x;
+        posy = json.pos_y;
+        step = 0;
+        window.requestAnimationFrame(draw);
+    }
+    function draw() {
+      const canvas = document.getElementById("canvas");
+      if (canvas.getContext) {
+        const ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, 500, 500)
+        ctx.fillStyle = "black";
+        for (let i = 0; i < maze.length; i++) {
+            for (let j = 0; j < maze[0].length; j++) {
+                if (maze[i][j] == '#'){
+                    ctx.fillRect(i*5, j*5, 5, 5);
+                }
+            }
+        }
+        ctx.fillStyle = "red";
+        ctx.fillRect(0, 0, 5, 5);
+        ctx.fillStyle = "green";
+        ctx.fillRect(posx*5, posy*5, 5, 5);
+        if (step < 100){
+            if (moves[step] == 0){
+                posx -=1;
+            }else if (moves[step] == 1){
+                posx +=1;
+            }else if (moves[step] == 2){
+                posy -=1;
+            }else if (moves[step] == 3){
+                posy +=1;
+            }
+            step++;
+            window.requestAnimationFrame(draw)
+        }
+      }
+    }
+</script>
+</html>
