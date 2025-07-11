@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="title">
+    {{ hash_id }}
+</h1>
+<div class="resource">
+{% for url, path in resource %}
+    <tr>
+        <td><a href="{{ url }}">{{ path }}</a><br/></td>
+    </tr>
+{% endfor %}
+</div>
+{% endblock %}
